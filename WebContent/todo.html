@@ -73,15 +73,24 @@
 		function showResultCount(){
 			var taskCount = document.getElementById("task-count");
 			var todoElements = document.getElementById("todo-elements");
-			var count = 0;
+			
 			var len = todoElements.childElementCount;
 			
+			var count = 0;
 			for (var i = 0; i < len; i++){
 				if (todoElements.children[i].style.display != 'none'){
 					count++;
 				}
 			}
-			taskCount.innerText = 'Results: ' + count;
+			
+			var todoCount = 0;
+			for (key in localStorage){
+				if (key.substring(0, 4) == "todo"){
+					todoCount++;
+				}
+			}
+	
+			taskCount.innerHTML = `<label>Todos: ${todoCount}</label><br><br><label>Results: ${count}</label>`;
 		}
 		
 		var addItemBtn = document.getElementById('add-new-item');
