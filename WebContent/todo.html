@@ -39,8 +39,8 @@
 			</select>
 			<label>Order by date:</label>
 			<select id="date-filter">
-				<option value="asc" selected>Ascending</option>
-				<option value="desc">Descending</option>
+				<option value="asc">Ascending</option>
+				<option value="desc" selected>Descending</option>
 			</select>
 		</div>
 		<p id="task-count"></p>
@@ -152,9 +152,9 @@
 				}
 				
 				displayAllTodoElements(null);
-				performOrderByNameFilter();
+				//performOrderByNameFilter();
 				performOrderByDateFilter();
-				performStatusFilter();
+				//performStatusFilter();
 				showResultCount();
 			} catch (exc) {
 				console.error(exc);
