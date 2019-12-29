@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>To-do List</title>
+<link rel="stylesheet" type="text/css" href="todo.css">
+<script src="constants.js"></script>
+</head>
+<body>
+	<header>
+		<h1>MY TO-DO LIST</h1>
+	</header>
+	<div>
+		<label class="notes" style="color: yellow">Enter text into the
+			input field to add items to your list</label> <label class="notes"
+			style="color: rgb(0, 255, 0)">Click the item to mark it as
+			complete</label> <label class="notes">Click delete to remove the item
+			from your list</label>
+	</div>
+	<div class="container">
+		<div class="input-box">
+			<input id="user-input" type="text" placeholder="New Item...">
+			<input id="add-new-item" type="button" value="Add">
+		</div>
+		<div class="input-box">
+			<input id="user-search" type="text" placeholder="Search...">
+		</div>
+		<div class="input-box">
+			<label>Filter by status:</label>
+			<select id="status-filter">
+				<option value="All" selected>All</option>
+				<option value="Complete">Complete</option>
+				<option value="Incomplete">Incomplete</option>
+			</select>
+			<label>Order by name:</label>
+			<select id="name-filter">
+				<option value="asc" selected>Ascending</option>
+				<option value="desc">Descending</option>
+			</select>
+			<label>Order by date:</label>
+			<select id="date-filter">
+				<option value="asc" selected>Ascending</option>
+				<option value="desc">Descending</option>
+			</select>
+		</div>
+		<p id="task-count"></p>
+		<div id="todo-elements" class="item-list"></div>
+	</div>
+	<script>
+		/*
+			TODO: A suitable message on the page telling the user to add a new task if they don't have any
+			TODO: Custom modals
+			TODO: Statistics modal box: number of tasks, completion %, oldest task, newest task, histogram
+			TODO: Wrap a scroll bar around the todo list
+		*/
+		/*
+			Extras: 
+				> Notify the user if there are tasks older than 3 days
+				> onchange may have limits.
+				> Create an apply button next to each drop down filter
+		*/
+		function Todo(id, name, status, date) {
+			this.id = id;
+			this.name = name;
+			this.status = status;
+			this.date = date;
+		}
+					
+		var deleteIsClicked = false;
+		
+		window.onload = init;
+		
+		function showResultCount(){
+			var taskCount = document.getElementById("task-count");
+			var todoElements = document.getElementById("todo-elements");
+			var count = 0;
+			var len = todoElements.childElementCount;
+			
+			for (var i = 0; i < len; i++){
+				if (todoElements.children[i].style.display != 'none'){
+					count++;
+				}
+			}
+			taskCount.innerText = 'Results: ' + count;
+		}
+		
+		var addItemBtn = document.getElementById('add-new-item');
+		addItemBtn.onclick = function(){
+			addTodoItem();
+			showResultCount();
+		};
+		
+		var userInput = document.getElementById("user-input");
+		userInput.onkeypress = function(e) {
+			if (e.key == 'Enter') {
+				addTodoItem();
+				showResultCount();
+			}
+		}
+		
+		var userSearch = document.getElementById("user-search");
+		userSearch.onkeyup = function(){
+			performSearch();
+			showResultCount();
+		};
+		userSearch.onfocus = function(){
+			if (!statusFilter[0].selected){
+				statusFilter[0].selected = true;
+				performStatusFilter();
+				showResultCount();
+			}
+		}
+		
+		var orderByNameFilter = document.getElementById("name-filter");
+		orderByNameFilter.onchange = function(e){
+			var option = e.target.value;
+			if (option == 'asc'){
+				displaySortedTodos(null, true);
+			} else if (option == 'desc'){
+				displaySortedTodos(null, false);
+			}
+			showResultCount();
+		}
+		
+		var statusFilter = document.getElementById("status-filter");
+		statusFilter.onchange = function(e){
+			var option = e.target.value;
+			applyStatusFilter(option);
+			showResultCount();
+		}
+		
+		
+		var orderByDateFilter = document.getElementById("date-filter");
+		orderByDateFilter.onchange = function(e){
+			var option = e.target.value;
+			if (option == 'asc'){
+				displaySortedTodos("date", true);
+			} else if (option == 'desc'){
+				displaySortedTodos("date", false);
+			}
+			showResultCount();
+		}
+		
+		
+		function init() {
+			try {
+				if (!localStorage) {
+					throw NO_STORAGE_ERROR_MSG;
+				}
+				if (localStorage.getItem("id_gen") == null) {
+					localStorage.setItem("id_gen", 0);
+				}
+				
+				displayAllTodoElements(null);
+				performOrderByNameFilter();
+				performOrderByDateFilter();
+				performStatusFilter();
+				showResultCount();
+			} catch (exc) {
+				console.error(exc);
+			}
+		}
+		
+		
+		function performOrderByNameFilter(){
+			if (orderByNameFilter[0].selected){
+				displaySortedTodos(null, true);
+			} else if (orderByNameFilter[1].selected){
+				displaySortedTodos(null, false);
+			}
+		}
+		
+		
+		function performOrderByDateFilter(){
+			if (orderByDateFilter[0].selected){
+				displaySortedTodos("date", true);
+			} else if (orderByDateFilter[1].selected){
+				displaySortedTodos("date", false);
+			}
+		}
+		
+		function performStatusFilter(){
+			if (statusFilter[0].selected){
+				applyStatusFilter("All");
+			} else if (statusFilter[1].selected){
+				applyStatusFilter("Complete");
+			} else if (statusFilter[2].selected){
+				applyStatusFilter("Incomplete");
+			}
+		}
+		
+	
+		function applyStatusFilter(option){
+			clearAllTodoElements();
+			if (option == "All"){
+				displayAllTodoElements(null);
+			} else if (option == "Complete"){
+				displayAllTodoElements(true);
+			} else if (option == "Incomplete"){
+				displayAllTodoElements(false);
+			}
+			
+		}
+	
+		
+		function performSearch(){
+			var todoElementsDiv = document.getElementById("todo-elements");
+			var userSearch = document.getElementById("user-search");
+			var userSearchValue = userSearch.value.toUpperCase();
+			
+			const len = todoElementsDiv.childElementCount;
+			for (var i = 0; i < len; i++){
+				var nextTodoElement = todoElementsDiv.children[i];
+				var name = nextTodoElement.children[0].textContent.toUpperCase();
+				var status = nextTodoElement.children[1].textContent.toUpperCase();
+				var added = nextTodoElement.children[2].textContent.toUpperCase();
+				if (!(name.indexOf(userSearchValue) > -1 || status.indexOf(userSearchValue) > -1 
+						|| added.indexOf(userSearchValue) > -1)){
+					nextTodoElement.style.display = 'none';
+				} else {
+					nextTodoElement.style.display = '';
+				}
+			}
+		}
+		
+		
+		function parseTodo(todoObj){
+			var todoJSON = JSON.parse(todoObj);
+			var todo = new Todo(todoJSON.id, todoJSON.name,
+					todoJSON.status, new Date(todoJSON.date));
+			return todo;
+		}
+		
+
+		function displayAllTodoElements(status) {
+			if (localStorage) {
+				var todoElements = document.getElementById("todo-elements");
+				for (var i = 0; i < localStorage.length; i++) {
+					var key = localStorage.key(i);
+					if (key.substring(0, 4) == "todo") {
+						var todoString = localStorage.getItem(key);
+						var todoObject = parseTodo(todoString);
+						if (status == null || todoObject.status == status){
+							var todoElement = createTodoElement(todoObject);
+							markTodoElement(todoElement, todoObject.status);
+							todoElements.appendChild(todoElement);
+						}
+					}
+				}
+			} else {
+				throw NO_STORAGE_ERROR_MSG;
+			}
+		}
+		
+
+		function generateId() {
+			if (localStorage) {
+				var id = localStorage.getItem("id_gen");
+				var nextId = parseInt(id) + 1;
+				localStorage.setItem("id_gen", nextId);
+				return id;
+			} else {
+				throw NO_STORAGE_ERROR_MSG;
+			}
+		}
+
+		
+		function addTodoItem() {
+			var input = document.getElementById("user-input");
+			if (input.value == null || input.value == '' || input.value.trim() == '') {
+				alert("Please enter a name with characters");
+				return;
+			}
+
+			if (input.value.length > MAX_CHARACTER_LENGTH) {
+				alert("Character length cannot be greater than "
+						+ MAX_CHARACTER_LENGTH);
+				return;
+			}
+
+			try {
+				var todoElements = document.getElementById("todo-elements");
+				var newId = "todo" + generateId();
+				var newTodo = new Todo(newId, input.value, false, new Date());
+				saveTodo(newTodo);
+				alert(`Todo Item (${input.value}) added successfully`);
+				var todoElement = createTodoElement(newTodo);
+				if (!statusFilter[1].selected){
+					todoElements.appendChild(todoElement);
+				}
+				input.value = '';
+			} catch (exc) {
+				console.error(exc);
+			}
+		}
+		
+
+		function createTodoElement(todo) {
+			if (!(todo instanceof Todo)){
+				return;
+			}
+			var todoElement = document.createElement("div");
+			todoElement.onclick = function(){
+				if (!deleteIsClicked)
+					toggleStatus(event);
+				deleteIsClicked = false;
+			};
+			todoElement.classList.add("item");
+			todoElement.id = todo.id;
+
+			//Label
+			var taskNameElement = createLabel(todo.name, true);
+			taskNameElement.style.fontWeight = 'bold';
+			todoElement.appendChild(taskNameElement);
+			todoElement.appendChild(createLabel(todo.status ? "Complete"
+					: "Incomplete", true));
+			todoElement.appendChild(createLabel("Added: "
+					+ formatDate(todo.date), false));
+
+			//Delete button
+			var deleteButton = document.createElement("div");
+			deleteButton.appendChild(document.createTextNode("Delete"));
+			deleteButton.classList.add("delete-button");
+			deleteButton.onclick = function(){
+				deleteIsClicked = true;
+				deleteTodoItem(event);
+				showResultCount();
+			};
+			todoElement.appendChild(deleteButton);
+
+			return todoElement;
+		}
+		
+
+		function createLabel(text, newLine) {
+			var label = document.createElement("label");
+			label.style.marginBottom = '10px';
+			if (newLine) {
+				label.style.display = 'block';
+			}
+			label.appendChild(document.createTextNode(text));
+			return label;
+		}
+
+		function deleteTodoItem(e) {
+			var todoElement = e.target.parentElement;
+			try {
+				var toDelete = `${todoElement.children[0].innerText}`;
+				if (confirm(`Are you sure you want to remove: ${toDelete}`)){
+					removeTodo(todoElement.id);
+					alert(`Removed Todo Item: ${toDelete}`);
+					todoElement.remove();
+				}
+			} catch (exc) {
+				console.error(exc);
+			}
+		}
+		
+
+		function toggleStatus(e) {
+			var todoElement = e.target.parentElement;
+			if (todoElement.id == "todo-elements") {
+				todoElement = e.target;
+			}
+			try {
+				var todo = findTodo(todoElement.id);
+				if (todo == null) {
+					return;
+				}
+				todo.status = !todo.status;
+				saveTodo(todo);
+				if ((!todo.status && statusFilter[1].selected) || (todo.status && statusFilter[2].selected)){
+					setTimeout(function(){
+						todoElement.style.display = "none";
+						showResultCount();
+					}, 670);
+				}
+				markTodoElement(todoElement, todo.status);
+			} catch (exc) {
+				console.error(exc);
+			}
+		}
+		
+		
+		function markTodoElement(todoElement, complete){
+			const DEFAULT = 'rgb(0,180, 255)';
+			const COMPLETE = 'lightgreen';
+			const HOVER = 'pink';
+			
+			todoElement.children[1].innerText = complete ? 'Complete' : 'Incomplete'
+			todoElement.style.backgroundColor = complete ? COMPLETE : DEFAULT;
+			todoElement.style.transition = '0.3s';
+			todoElement.onmouseover = function(){
+				this.style.backgroundColor = HOVER;
+			};
+			todoElement.onmouseout = function(){
+				this.style.backgroundColor = complete ? COMPLETE : DEFAULT;
+			};
+		}
+		
+
+		function findTodo(id) {
+			if (localStorage) {
+				var value = localStorage.getItem(id);
+				if (value == null) {
+					return null;
+				}
+				return parseTodo(value);
+			} else {
+				throw NO_STORAGE_ERROR_MSG;
+			}
+		}
+		
+
+		function saveTodo(todo) {
+			if (localStorage) {
+				if (todo == null || !(todo instanceof Todo)) {
+					return;
+				}
+				var json = JSON.stringify(todo);
+				localStorage.setItem(todo.id, json);
+			} else {
+				throw NO_STORAGE_ERROR_MSG;
+			}
+		}
+		
+
+		function removeTodo(id) {
+			if (localStorage) {
+				localStorage.removeItem(id);
+			} else {
+				throw NO_STORAGE_ERROR_MSG;
+			}
+		}
+		
+		
+		function getTodosAsList(){
+			if (localStorage){
+				var result = [];
+				for (var i = 0; i < localStorage.length; i++){
+					var key = localStorage.key(i);
+					if (key.substring(0, 4) == "todo"){
+						var todoString = localStorage.getItem(key);
+						var todoObject = parseTodo(todoString);
+						result.push(todoObject);
+					}
+				}
+				return result;
+			} else {
+				throw NO_STORAGE_ERROR_MSG;
+			}
+		}
+		
+		
+		function getTodosAsListFromPage(){
+			try{
+				var todoElements = document.getElementById("todo-elements");
+				var len = todoElements.childElementCount;
+				var result = [];
+				for (var i = 0; i < len; i++){
+					var todoObj = findTodo(todoElements.children[i].id);
+					result.push(todoObj);
+				}
+				return result;
+			} catch (exc){
+				console.error(exc);
+				return [];
+			}
+		}
+		
+		
+		function clearAllTodoElements(){
+			var todoElements = document.getElementById("todo-elements");
+			var length = todoElements.childElementCount;
+			for (var i = 0; i < length; i++){
+				todoElements.removeChild(todoElements.children[0]);
+			}
+		}
+		
+		
+		function displaySortedTodos(orderBy, ascending){
+			var sorted;
+			if (orderBy == "date"){
+				sorted = getTodosAsListFromPage().sort(function(left, right){
+					if (ascending){
+						return left.date > right.date;
+					}
+					return left.date < right.date;
+				});
+			} else {
+				sorted = getTodosAsListFromPage().sort(function(left, right){
+					if (ascending){
+						return left.name.localeCompare(right.name);
+					}
+					return right.name.localeCompare(left.name);
+				});
+			}
+			
+			clearAllTodoElements();
+			
+			var todoElements = document.getElementById("todo-elements");
+			for (todoObject of sorted){
+				var todoElement = createTodoElement(todoObject);
+				markTodoElement(todoElement, todoObject.status);
+				todoElements.appendChild(todoElement);
+			}
+		}
+
+		
+		function formatDate(date) {
+			var day = formatNumber(date.getDate());
+			var month = formatNumber(date.getMonth() + 1);
+			var year = formatNumber(date.getFullYear());
+			var hour = formatNumber(date.getHours());
+			var minute = formatNumber(date.getMinutes());
+			return `${day}/${month}/${year}  ${hour}:${minute}`;
+		}
+		
+		
+		function formatNumber(number){
+			return number < 10 ? "0" + number : number;
+		}
+	</script>
+</body>
+</html>

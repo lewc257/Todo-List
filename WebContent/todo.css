@@ -1,0 +1,128 @@
+body {
+	font-family: arial;
+	background-color:rgb(0, 120, 255);
+}
+
+header{
+	text-align: center;
+	color:white;
+}
+
+.container {
+	margin-left:auto;
+	margin-right:auto;
+	padding-bottom:30%;
+	margin-top:3%;
+	width: 50%;
+}
+
+.notes {
+	text-align:center;
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:20px;
+	margin-bottom:10px;
+	font-size:17px;
+}
+
+.container .input-box{
+	padding-bottom:10px;
+}
+
+.input-box input[type="text"]{
+	width:80%;
+	font-size:20px;
+	box-sizing:border-box;
+	border-radius:5px;
+	border-style:solid;
+	border-color:lightgrey;
+}
+
+.input-box input[type="button"]{
+	width:19%;
+	font-size:20px;
+	box-sizing:border-box;
+	border-radius: 5px;
+	border-style:solid;
+	border-width: 1px;
+	border-color:black;
+	padding:2px;
+	background:  rgb(0,90, 255);;
+	color: white;
+	transition: 0.3s;
+}
+
+.input-box input[type="button"]:hover{
+	background-color:black;
+}
+
+.input-box input[type="button"]:active{
+	background-color:white;
+	color:blue;
+}
+
+.input-box select{
+	margin-top:10px;
+	font-size:15px;
+	border-radius: 5px;
+	border-color:lightgrey;
+}
+
+select label {
+	font-size:15px;
+}
+
+.container .item-list{
+	font-size:19px;
+	width:100%;
+}
+
+.item {
+	border: 1px solid black;
+	border-radius: 5px;
+	background:  rgb(0,180, 255);
+	display:block;
+	padding: 10px;
+	width: 100%;;
+	box-sizing: border-box;
+	transition: 0.3s;
+}
+
+.item:hover {
+	background-color: pink;
+	color:black;
+}
+
+.item:focus {
+	background-color: lightgreen;
+}
+
+.item .delete-button{
+	border: 1px black solid;
+	width:11%;
+	float:right;
+	text-align:center;
+	box-sizing: border-box;
+	padding:2px;
+	font-size:18px;
+	transition: 0.3s;
+	border-radius:5px;
+	background-color:  rgb(0,90, 255);
+	color:white;
+	cursor:pointer;
+}
+
+.toggle-bg{
+	background-color:pink;
+}
+
+.item .delete-button:hover {
+	background-color: black;
+	color:white;
+}
+
+.item .delete-button:active{
+	background-color: white;
+	color:blue;	
+}
