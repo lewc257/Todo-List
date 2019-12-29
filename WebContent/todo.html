@@ -48,7 +48,6 @@
 	</div>
 	<script>
 		/*
-			TODO: A suitable message on the page telling the user to add a new task if they don't have any
 			TODO: Custom modals
 			TODO: Statistics modal box: number of tasks, completion %, oldest task, newest task, histogram
 			TODO: Wrap a scroll bar around the todo list
@@ -160,10 +159,13 @@
 					localStorage.setItem("id_gen", 0);
 				}
 				
-				displayAllTodoElements(null);
+				//TODO: Remember to select "All"
+				
+				//displayAllTodoElements(null);
+				performStatusFilter();
 				//performOrderByNameFilter();
 				performOrderByDateFilter();
-				//performStatusFilter();
+				
 				showResultCount();
 			} catch (exc) {
 				console.error(exc);
@@ -379,10 +381,10 @@
 				todo.status = !todo.status;
 				saveTodo(todo);
 				if ((!todo.status && statusFilter[1].selected) || (todo.status && statusFilter[2].selected)){
-					setTimeout(function(){
+					//setTimeout(function(){
 						todoElement.style.display = "none";
 						showResultCount();
-					}, 670);
+					//}, 670);
 				}
 				markTodoElement(todoElement, todo.status);
 			} catch (exc) {
