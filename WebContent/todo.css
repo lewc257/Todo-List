@@ -16,6 +16,12 @@ header{
 	width: 50%;
 }
 
+.table-scroll{
+	  height:432px;
+	  overflow:auto;  
+	  margin-top:20px;
+}
+
 .notes {
 	text-align:center;
 	display:block;

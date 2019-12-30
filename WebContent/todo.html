@@ -44,7 +44,9 @@
 			</select>
 		</div>
 		<p id="task-count"></p>
-		<div id="todo-elements" class="item-list"></div>
+		<div class="table-scroll">
+			<div id="todo-elements" class="item-list"></div>
+		</div>
 	</div>
 	<script>
 		/*
@@ -469,7 +471,8 @@
 				var len = todoElements.childElementCount;
 				var result = [];
 				for (var i = 0; i < len; i++){
-					var todoObj = findTodo(todoElements.children[i].id);
+					var todoElement = todoElements.children[i];
+					var todoObj = findTodo(todoElement.id);
 					result.push(todoObj);
 				}
 				return result;
