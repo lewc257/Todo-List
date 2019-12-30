@@ -50,15 +50,19 @@
 	</div>
 	<script>
 		/*
-			TODO: Custom modals
+			TODO: Delete all tasks button.
+			TODO:  onchange may have limits. Create an apply button next to each drop down filter
 			TODO: Statistics modal box: number of tasks, completion %, oldest task, newest task, histogram
-			TODO: Wrap a scroll bar around the todo list
 		*/
 		/*
 			Extras: 
 				> Notify the user if there are tasks older than 3 days
-				> onchange may have limits.
-				> Create an apply button next to each drop down filter
+				> Custom modals
+				
+			Improvements
+				> restrict things a bit more by making it more OOP
+				> Inlcude a notification service (task scheduler)
+				> Each task can have its own set of subtasks.
 		*/
 		function Todo(id, name, status, date) {
 			this.id = id;
