@@ -51,7 +51,7 @@
 	<script>
 		/*
 			TODO: Delete all tasks button.
-			TODO:  onchange may have limits. Create an apply button next to each drop down filter
+			TODO: Onchange may have limits. Create an apply button next to each drop down filter
 			TODO: Statistics modal box: number of tasks, completion %, oldest task, newest task, histogram
 		*/
 		/*
@@ -489,9 +489,8 @@
 		
 		function clearAllTodoElements(){
 			var todoElements = document.getElementById("todo-elements");
-			var length = todoElements.childElementCount;
-			for (var i = 0; i < length; i++){
-				todoElements.removeChild(todoElements.children[0]);
+			while (todoElements.hasChildNodes()){
+				todoElements.removeChild(todoElements.firstChild);
 			}
 		}
 		
