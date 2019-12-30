@@ -51,8 +51,6 @@
 	</div>
 	<script>
 		/*
-			TODO: Delete all tasks button.
-			TODO: Onchange may have limits. Create an apply button next to each drop down filter
 			TODO: Statistics modal box: number of tasks, completion %, oldest task, newest task, histogram
 		*/
 		/*
@@ -168,14 +166,8 @@
 				if (!localStorage) {
 					throw NO_STORAGE_ERROR_MSG;
 				}
-				
-				//TODO: Remember to select "All"
-				
-				//displayAllTodoElements(null);
 				performStatusFilter();
-				//performOrderByNameFilter();
 				performOrderByDateFilter();
-				
 				showResultCount();
 			} catch (exc) {
 				console.error(exc);
