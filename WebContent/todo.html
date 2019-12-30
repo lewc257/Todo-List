@@ -43,6 +43,7 @@
 				<option value="desc" selected>Descending</option>
 			</select>
 		</div>
+		<input id="delete-all" style="margin: 5px; font-size:17px; float:right" type="button" value="Delete All">
 		<p id="task-count"></p>
 		<div class="table-scroll">
 			<div id="todo-elements" class="item-list"></div>
@@ -97,6 +98,12 @@
 	
 			taskCount.innerHTML = `<label>Todos: ${todoCount}</label><br><br><label>Results: ${count}</label>`;
 		}
+		
+		var deleteAllBtn = document.getElementById("delete-all");
+		deleteAllBtn.onclick = function(e){ 
+			deleteAllTodos(e);
+			showResultCount();
+		};
 		
 		var addItemBtn = document.getElementById('add-new-item');
 		addItemBtn.onclick = function(){
@@ -161,9 +168,6 @@
 				if (!localStorage) {
 					throw NO_STORAGE_ERROR_MSG;
 				}
-				if (localStorage.getItem("id_gen") == null) {
-					localStorage.setItem("id_gen", 0);
-				}
 				
 				//TODO: Remember to select "All"
 				
@@ -175,6 +179,15 @@
 				showResultCount();
 			} catch (exc) {
 				console.error(exc);
+			}
+		}
+		
+		function deleteAllTodos(e){
+			if (localStorage.length > 1){
+				if (confirm("Are you sure you want to delete all todos?")){
+					localStorage.clear();
+					clearAllTodoElements();
+				}
 			}
 		}
 		
@@ -272,6 +285,9 @@
 
 		function generateId() {
 			if (localStorage) {
+				if (localStorage.getItem("id_gen") == null) {
+					localStorage.setItem("id_gen", 0);
+				}
 				var id = localStorage.getItem("id_gen");
 				var nextId = parseInt(id) + 1;
 				localStorage.setItem("id_gen", nextId);
